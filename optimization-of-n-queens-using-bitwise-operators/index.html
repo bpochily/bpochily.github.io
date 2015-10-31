@@ -1,0 +1,270 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Optimization of N-Queens Using Bitwise Operators</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=cf2041d78d">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+    <link rel="stylesheet" type="text/css" href="../assets/css/prism.css?v=cf2041d78d">    
+
+    <link rel="canonical" href="index.html">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="Ben Pochily">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Optimization of N-Queens Using Bitwise Operators">
+    <meta property="og:description" content="The N-Queens problem is a classic problem in algorithm design. It involves finding a way (or multiple ways) to place n queens on an n by n chessboard such that no queen can attack another along any row, column or...">
+    <meta property="og:url" content="http://localhost:2368/optimization-of-n-queens-using-bitwise-operators/">
+    <meta property="article:published_time" content="2015-10-30T23:08:00.000Z">
+    <meta property="article:modified_time" content="2015-10-30T23:45:41.183Z">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Optimization of N-Queens Using Bitwise Operators">
+    <meta name="twitter:description" content="The N-Queens problem is a classic problem in algorithm design. It involves finding a way (or multiple ways) to place n queens on an n by n chessboard such that no queen can attack another along any row, column or...">
+    <meta name="twitter:url" content="http://localhost:2368/optimization-of-n-queens-using-bitwise-operators/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "Ben Pochily",
+    "author": {
+        "@type": "Person",
+        "name": "Ben Pochily",
+        "url": "http://localhost:2368/author/ben",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "Optimization of N-Queens Using Bitwise Operators",
+    "url": "http://localhost:2368/optimization-of-n-queens-using-bitwise-operators/",
+    "datePublished": "2015-10-30T23:08:00.000Z",
+    "dateModified": "2015-10-30T23:45:41.183Z",
+    "description": "The N-Queens problem is a classic problem in algorithm design. It involves finding a way (or multiple ways) to place n queens on an n by n chessboard such that no queen can attack another along any row, column or..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="Ben Pochily" href="../rss/index.html">
+</head>
+<body class="post-template nav-closed">
+
+    <div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="index.html#" class="nav-close">
+        <span class="hidden">Close</span>
+    </a>
+    <ul>
+            <li class="nav-home" role="presentation"><a href="../">Home</a></li>
+    </ul>
+    <a class="subscribe-button icon-feed" href="../rss/index.rss">Subscribe</a>
+</div>
+<span class="nav-cover"></span>
+
+
+    <div class="site-wrapper">
+
+        
+
+
+<header class="main-header post-head no-cover">
+    <nav class="main-nav  clearfix">
+        
+            <a class="menu-button icon-menu" href="index.html#"><span class="word">Menu</span></a>
+    </nav>
+</header>
+
+<main class="content" role="main">
+    <article class="post">
+
+        <header class="post-header">
+            <h1 class="post-title">Optimization of N-Queens Using Bitwise Operators</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2015-10-30">30 October 2015</time> 
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>The N-Queens problem is a classic problem in algorithm design. It involves finding a way (or multiple ways) to place <em>n</em> queens on an <em>n</em> by <em>n</em> chessboard such that no queen can attack another along any row, column or diagonal. There are numerous possible approaches to this problem, ranging from extremely inefficient exhaustive generation and evaluation to modern solutions using neural networks or genetic algorithms. In this post I will explore an optimized recursive backtracking algorithm, implemented in JavaScript, which makes use of bit strings to efficiently prune the queen placement tree as early as possible. My approach, which will discover all possible solutions for a given value of <em>n</em>, is based on an algorithm by Martin Richards found in this <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.51.7113&amp;rep=rep1&amp;type=pdf">academic paper</a>.</p>
+
+<p>At the core of the algorithm is a simple recursive function which adds a queen to a single row of the chessboard, and then calls itself to add a queen to the row above. Let’s get a feel for the basic idea with some pseudocode:</p>
+
+<pre><code class="language-javascript">function placeQueen(board, row) {  
+  //if row is greater than board size
+    //BASE CASE: we’ve placed queens on every row, 
+    //return what we’ve found
+
+  //for each space in row
+    //if a queen can safely go here
+      //place queen on board
+      //call placeQueen with (board, row + 1) to place the next queen
+      //remove queen from board for next iteration
+}
+</code></pre>
+
+<p>The above function will build a complete tree of possible solutions, but skip searching branches as soon as a conflict is created. If our intent is an exhaustive search (rather than, for example, using heuristics to find a single solution), this is already a pretty solid approach. But let's explore further optimization by delving into how we check for conflicts with already-placed queens.</p>
+
+<p>There are a few possibilities for checking whether a queen can be placed on a given square. Initially, we might opt to scan each column and the major and minor diagonal of the potential square for other queens which could pose a threat, resulting in linear time complexity for every check. We can do better. By implementing caching of occupied columns and diagonals, we can get to constant time lookup. (Imagine passing along with the board an array of true or false values which represent whether a queen already resides in their column/diagonal. Then we can merely check this array, avoiding the need to scan every square in the column or diagonal). This is a step in the right direction. But we can go even further with the magic of bitwise operators, both by taking advantage of their great speed and by eliminating the need to test each possibility, skipping straight to each workable queen placement in constant time. Let’s take a look at how this is possible. (I assume a basic familiarity with bitwise operations. If you need a quick refresher on bit shifts and bitwise AND, OR, XOR, and NOT, Wikipedia is a good place to start). Complete JavaScript code for <code>findNQueensSolutions</code> is found near the bottom of this post - it may be helpful to refer to it while reading.</p>
+
+<p>First, we need to add some parameters to our recursive function – bit strings in which a set bit will represent the presence of a queen. Let’s call them <code>colBits</code>, <code>majDiagBits</code>, and <code>minDiagBits</code>. (If you’re stingy about parameters for some reason, you could also of course store all the information in a single parameter!) We’ll look at how these parameters are generated and updated in a moment; for now understand that (for example) bit 2 being set in <code>colBits</code> represents an existing vertical queen conflict in column two and bit 2 being set in <code>majDiagBits</code> represents a major diagonal queen conflict in column two <em>for the current row</em>. Thus, evaluating <code>colBits | majDiagBits | minDiagBits</code> gives us a bit string in which all columns which result in any type of conflict on this row are marked with set bits. Then we simply perform a NOT operation on the resulting bit string to obtain a bit string in which all possible, non-conflicting queen locations for this row are set.</p>
+
+<p>Since we will shortly be adding a queen at each set bit without wasting time on range checking, we need to perform a corrective action here. If our bit strings are stored in a number of greater than <em>n</em> bits (and they will be; I doubt any computers would be willing to accommodate our desire for a 5-bit number with which to solve the 5-queens problem!), there will be a number of unused zeros at the front of our bit string. And our previous NOT operation has just changed them all to ones, indicating that we should go ahead and put a queen on these non-existent spaces! To zero out everything but the last <em>n</em> bits, we simply mask (AND) our bit string with <code>(1 &lt;&lt; n) – 1</code>. The following example should clarify why this works:  </p>
+
+<pre><code>00000001 Start with the binary representation of 1  
+00010000 Left shift by n (in this case, 4)  
+00001111 Subtract 1 (regular integer subtraction)  
+We can now AND this bit string with any number to zero out all but the last 4 bits.  
+</code></pre>
+
+<p>Okay, so we have a bit string where each set bit represents a possible queen placement, and we’ve found it using only extremely efficient bitwise operations. At this point we could pat ourselves on the back for some nice optimizations and loop over the bit string (via shifting), plopping down queens wherever we see a one. But we can actually improve our time even more by only looping over the bits where we know we will actually place a queen. Assuming we stored our result from the last operation in a variable called <code>possibilities</code>, it looks like this:  </p>
+
+<pre><code class="language-javascript">while (bit = (possibilities &amp; -possibilities)) {  
+</code></pre>
+
+<p>What’s going on there? The first thing to notice on this line is that we’re mixing an assignment and a conditional; generally a slightly obfuscating practice but reasonably clear in this instance. On each iteration, we set a variable <code>bit</code> to the result of ANDing <code>possibilities</code> and negative <code>possibilities</code>. This results in <code>bit</code> being set to all zeros with the exception of the least significant set bit in <code>possibilities</code>, where we will place our queen. Explaining why this works would require an in-depth discussion of how computers generally store signed numbers, which is beyond the scope of this blog post; interested readers should research two’s complement.</p>
+
+<p>Within the body of the loop, we first set <code>possibilities ^= bit</code>. This unsets the current (least significant) set bit in possibilities so the next time through the loop we will examine the next possibility (the new least significant set bit). We make our recursive call, updating our bit strings for the next row (recall that <code>bit</code> contains a bit string with a single 1 representing the queen's new location. Thus, ORing it with our passed-in conflict information adds it as a potential conflict for the recursive call):  </p>
+
+<pre><code class="language-javascript">placeQueen(colBits | bit, (majDiagBits | bit) &lt;&lt; 1, (minDiagBits | bit) &gt;&gt; 1)  
+</code></pre>
+
+<p>If it’s not apparent why shifting the diagonal bit strings by one is the correct way to update them, think about it this way: if a queen threatens a space in column <em>i</em> along its major diagonal, it threatens space <em>(i – 1)</em> in the row immediately above. Thus, shifting each set bit by one in the appropriate direction results in the correct conflict information for the next row.</p>
+
+<hr>
+
+<p>Up to this point, I've followed the Martin Richards algorithm closely, which was my primary intent in creating this solution. But I'd now like to suggest a slightly modified version of the algorithm, which offers somewhat increased speed but perhaps requires us to think about bitwise operators in a less intuitive way. By inverting the meaning of a set bit outside our <code>while</code> loop, we are able to use a different set of bitwise operations (eliminating a NOT, replacing some ORs with XORs, etc.). In a certain sense, this approach creates a more consistent interpretation of our bit strings, but it also requires us to abandon our instinct that an empty board should be filled with zeros. It is not immediately clear that this should run any faster; however, profiling reveals that this configuration is in fact slightly more efficient, particularly as <em>n</em> becomes large. I won't provide a blow-by-blow walkthrough of this version of the algorithm; curious readers hopefully now have the tools to work through the code on their own.</p>
+
+<p>And that's it! With these optimizations, the algorithm runs around two orders of magnitude faster than our original recursive backtracking idea. Running in Google Chrome on my mid-range laptop, it finds the 92 solutions (counting symmetrical solutions) to the 8-queens problem in under a millisecond, and all (over 14 million) solutions to the 16-queens problem in less than twenty seconds. The following table shows average execution time for various versions of the algorithm and different values of <em>n</em>:</p>
+
+<table>  
+  <tr>
+    <td>Algorithm:</td>
+    <td><i>n</i> = 8</td>
+    <td>10</td>
+    <td>12</td>
+    <td>14</td>
+    <td>16</td>
+    <td>18</td>
+  </tr>
+  <tr>
+    <td>Basic recursive backtracking</td>
+    <td>19.3ms</td>
+    <td>263ms</td>
+    <td>7.9s</td>
+    <td>5:16</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>With caching</td>
+    <td>2.3ms</td>
+    <td>24.9ms</td>
+    <td>675ms</td>
+    <td>23.3s</td>
+    <td>17:24</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>With bitwise optimization</td>
+    <td>&lt; 1ms</td>
+    <td>1.8ms</td>
+    <td>17.9ms</td>
+    <td>514ms</td>
+    <td>21.8s</td>
+    <td>19:47</td>
+  </tr>
+  <tr>
+    <td>"Flipped" bitwise optimization</td>
+    <td>&lt; 1ms</td>
+    <td>1.3ms</td>
+    <td>16.0ms</td>
+    <td>453ms</td>
+    <td>19.7s</td>
+    <td>16:30</td>
+  </tr>
+</table>
+
+<p>Both complete bitwise implementations in JavaScript follow:  </p>
+
+<pre><code class="language-javascript ">function findNQueensSolutions(n) {  
+  var mask = (1 &lt;&lt; n) - 1;
+  (function placeQueen(colBits, majDiagBits, minDiagBits) {
+    if (colBits === mask) {
+      return; //Base case: do something with our solution.
+      //We would probably accept a callback parameter.
+    }
+
+    var bit, possibilities = ~(colBits | majDiagBits | minDiagBits) &amp; mask;
+    while (bit = possibilities &amp; -possibilities) {
+      possibilities ^= bit;
+      placeQueen(colBits | bit, (majDiagBits | bit) &lt;&lt; 1, (minDiagBits | bit) &gt;&gt; 1);
+    }
+  }(0, 0, 0));
+}
+</code></pre>
+
+<pre><code class="language-javascript">function findNQueensSolutionsFlipped(n) {  
+  var shiftCorrect = 1 &lt;&lt; (n - 1);
+  (function placeQueen(colBits, majDiagBits, minDiagBits) {
+    if (colBits === 0) {
+      return; //solution found
+    }
+
+    var bit, possibilities = colBits &amp; majDiagBits &amp; minDiagBits;
+    while (bit = possibilities &amp; -possibilities) {
+      possibilities ^= bit;
+      placeQueen(colBits ^ bit, (majDiagBits ^ bit) &lt;&lt; 1 | 1, (minDiagBits ^ bit) &gt;&gt; 1 | shiftCorrect);
+    }
+  }((1 &lt;&lt; n) - 1, (1 &lt;&lt; n) - 1, (1 &lt;&lt; n) - 1));
+}
+</code></pre>
+
+<p>These are tricky algorithms; it may take a while to grasp what's going on. Readers who wish to test their understanding may want to try answering the following questions:</p>
+
+<ul>
+<li>In <code>findNQueensSolutions</code>, why do we test for the base case with <code>colBits === mask</code>?</li>
+<li>How does <code>findNQueensSolutionsFlipped</code> work? Specifically:</li>
+<li>What does a set bit represent in each stage of the algorithm and how is it different from the non-flipped version? (Hint: examine the difference in the base case test)</li>
+<li>Why do we make our first call with <code>(1 &lt;&lt; n) - 1</code> as each parameter?</li>
+<li>Why have we switched from OR to XOR in our recursive call, and what is the purpose of <code>shiftCorrect</code>?</li>
+</ul>
+
+<p>I hope you've enjoyed this foray into the increasingly (and lamentably) unfrequented territory of bitwise operations, and maybe learned something along the way!</p>
+        </section>
+
+        <footer class="post-footer">
+
+       
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="../">Ben Pochily</a> © 2015</section>
+            <section class="poweredby">Proudly published with <a href="https://ghost.org">Ghost</a></section>
+        </footer>
+
+    </div>
+
+    
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=cf2041d78d"></script>
+    <script type="text/javascript" src="../assets/js/prism.js?v=cf2041d78d"></script> 
+    <script type="text/javascript" src="../assets/js/index.js?v=cf2041d78d"></script>
+
+</body>
