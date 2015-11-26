@@ -1,7 +1,98 @@
 <!DOCTYPE html>
+<html lang="en">
+
 <head>
+  <meta charset="utf-8">
+  <title>Monopoly Probabilities</title>
+  <link rel="stylesheet" type="text/css" href="styles/styles.css">
+  <script src="lib/jquery-1.11.3.min.js" defer></script>
+  <script src="lib/heatmap.min.js" defer></script>
+  <script src="scripts/data.js" defer></script>
+  <script src="scripts/display.js" defer></script>
+  <script src="scripts/index.js" defer></script>
 </head>
+
 <body>
-testing
+  <div id="heatmapContainer">
+    <img src="assets/monopoly.jpg" id="boardImage">
+  </div>
+  
+  <div id="inputForm">
+    <div class="expText">Show me probabilities starting from </div>
+    <select class="input" id="startSelect">
+      <option value="0">Go</option>
+      <option value="1">Mediterranean Avenue</option>
+      <option value="2">Community Chest</option>
+      <option value="3">Baltic Avenue</option>
+      <option value="4">Income Tax</option>
+      <option value="5">Reading Railroad</option>
+      <option value="6">Oriental Avenue</option>
+      <option value="7">Chance</option>
+      <option value="8">Vermont Avenue</option>
+      <option value="9">Connecticut Avenue</option>
+      <option value="10">Just Visiting</option>
+      <option value="40">Jail (first turn)</option>
+      <option value="41">Jail (second turn)</option>
+      <option value="42">Jail (third turn)</option>
+      <option value="11">St. Charles Place</option>
+      <option value="12">Electric Company</option>
+      <option value="13">States Avenue</option>
+      <option value="14">Virginia Avenue</option>
+      <option value="15">Pennsylvania Railroad</option>
+      <option value="16">St. James Place</option>
+      <option value="17">Community Chest</option>
+      <option value="18">Tennessee Avenue</option>
+      <option value="19">New York Avenue</option>
+      <option value="20">Free Parking</option>
+      <option value="21">Kentucky Avenue</option>
+      <option value="22">Chance</option>
+      <option value="23">Indiana Avenue</option>
+      <option value="24">Illinois Avenue</option>
+      <option value="25">B &amp; O Railroad</option>
+      <option value="26">Atlantic Avenue</option>
+      <option value="27">Ventnor Avenue</option>
+      <option value="28">Water Works</option>
+      <option value="29">Marvin Gardens</option>
+      <option value="31">Pacific Avenue</option>
+      <option value="32">North Carolina Avenue</option>
+      <option value="33">Community Chest</option>
+      <option value="34">Pennsylvania Avenue</option>
+      <option value="35">Short Line</option>
+      <option value="36">Chance</option>
+      <option value="37">Park Place</option>
+      <option value="38">Luxury Tax</option>
+      <option value="39">Boardwalk</option>
+    </select>
+    <div class="expText">for</div>
+    <select class="input" id="turnSelect">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="steady">Steady-state</option>
+    </select>
+    <div class="expText">turns in the future</div>
+    <div class="expText">with</div>
+    <div class="expText">
+      <input type="radio" class="input" name="jail" value="0" checked="checked">Short
+    </div>
+    <div class="expText">
+      <input type="radio" class="input" name="jail" value="1">Long
+    </div>
+    <div class="expText">preferred jail stay.</div>
+    <div class="displayMode">
+      <div class="expText">Display:</div>
+      <div class="expText">
+        <input type="radio" class="input" name="log" value="0" checked="checked">Linear
+      </div>
+      <div class="expText">
+        <input type="radio" class="input" name="log" value="1">Logarithmic
+      </div>
+    </div>
+    <div class="displayMode">Note: Heat map intensities are re-calibrated for each dataset</div>
+  </div>
 </body>
+
 </html>

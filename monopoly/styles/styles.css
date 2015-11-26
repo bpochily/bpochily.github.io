@@ -1,0 +1,29 @@
+body {
+  margin:0;
+  padding:0;
+}
+
+.expText {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+      
+.displayMode {
+  padding-top: 15px;
+}
+      
+#heatmapContainer {
+  display: inline-block;
+  height: 100vh;
+  width: 100vh;
+}
+
+#boardImage {
+  height: 100%;
+}
+
+#inputForm {
+  display: inline-block;
+  vertical-align: top;
+  padding: 25px;
+}
