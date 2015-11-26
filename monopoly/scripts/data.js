@@ -1,29 +1,31 @@
 var dataFetcher = function() {
   var ret = {};
-  var data;
+  var cachedData;
   var fetch = function(cb) {
     $.getJSON('data/prob.json', function(data) {
-    cb(data);
+      cb(data);
     })
   }
   
   ret.getTable = function(turn, start, jail, cb) {
-    if (!data) {
+    if (!cachedData) {
       fetch(function(data) {
+        cachedData = data;
         cb(data[jail ? 'jail' : 'noJail'][turn - 1][start]);
       });
     } else {
-      cb(data[jail ? 'jail' : 'noJail'][turn - 1][start]);
+      cb(cachedData[jail ? 'jail' : 'noJail'][turn - 1][start]);
     }
   }
 
   ret.getSteady = function(jail, cb) {
-    if (!data) {
+    if (!cachedData) {
       fetch(function(data) {
+        cachedData = data;
         cb(data['steady' + (jail ? 'Jail' : '')]);
       });
     } else {
-      cb(data['steady' + (jail ? 'Jail' : '')]);
+      cb(cachedData['steady' + (jail ? 'Jail' : '')]);
     }
   }
   return ret;
