@@ -24,7 +24,7 @@
     <meta property="og:description" content="The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit...">
     <meta property="og:url" content="http://bpochily.github.io/calculating-monopoly-probabilities/">
     <meta property="article:published_time" content="2015-11-29T04:39:00.000Z">
-    <meta property="article:modified_time" content="2015-11-29T04:40:04.968Z">
+    <meta property="article:modified_time" content="2015-11-29T04:58:12.084Z">
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Calculating Monopoly Probabilities">
@@ -46,7 +46,7 @@
     "headline": "Calculating Monopoly Probabilities",
     "url": "http://bpochily.github.io/calculating-monopoly-probabilities/",
     "datePublished": "2015-11-29T04:39:00.000Z",
-    "dateModified": "2015-11-29T04:40:04.968Z",
+    "dateModified": "2015-11-29T04:58:12.084Z",
     "description": "The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit..."
 }
     </script>
@@ -149,7 +149,7 @@ private void doRolls(int numDoubles, double multiplier) {
 
 <p>As I've mentioned, I'm far from the first to calculate Monopoly probabilities programmatically. The primary advantage to my solution over others I've encountered is its adaptability, made possible by Java's object-oriented elegance. Monopoly has inspired about a billion spin-offs - from predictable variants like Star Wars Monopoly to the baffling abomination Heinz Ketchup Monopoly. One of the design goals in crafting my AI was to accommodate the ketchup zealots of the world, so it is important that the probability calculation can adapt to new boards automatically. In addition to handling boards of any size or space configuration, my calculator can tackle any number of custom decks of cards, modified rules of jail and doubles, or strange combinations of dice with any number of sides. More complicated rule modifications can likely be easily handled by extending the <code>ProbSpace</code> class and overriding a method or two.</p>
 
-<p>This has been a whirlwind tour through what is actually a surprisingly subtle and interesting computation. Again, I recommend checking out <a href="http://www.durangobill.com/Monopoly.html">Durango Bill's site</a> for more of the nitty-gritty details. If you just want to see the probability results, I wrote a quick-and-dirty web app which visualizes the calculated probabilities using a heat map. Have a look <a href="http://localhost:2368/monopoly">here</a>!</p>
+<p>This has been a whirlwind tour through what is actually a surprisingly subtle and interesting computation. Again, I recommend checking out <a href="http://www.durangobill.com/Monopoly.html">Durango Bill's site</a> for more of the nitty-gritty details. If you just want to see the probability results, I wrote a quick-and-dirty web app which visualizes the calculated probabilities using a heat map. Have a look <a href="http://bpochily.github.io/monopoly">here</a>!</p>
 
 <p>Or, if you'd like to take a look at the full Java source code for calculating the probabilities, head over to my <a href="http://github.com/bpochily/monopoly-probabilities">github</a>.</p>
         </section>
