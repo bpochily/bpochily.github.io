@@ -1,0 +1,191 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Calculating Monopoly Probabilities</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=c3727af285">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+    <link rel="stylesheet" type="text/css" href="../assets/css/prism.css?v=c3727af285">    
+
+    <link rel="canonical" href="http://bpochily.github.io/calculating-monopoly-probabilities/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="Ben Pochily">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Calculating Monopoly Probabilities">
+    <meta property="og:description" content="The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit...">
+    <meta property="og:url" content="http://bpochily.github.io/calculating-monopoly-probabilities/">
+    <meta property="article:published_time" content="2015-11-29T04:39:00.000Z">
+    <meta property="article:modified_time" content="2015-11-29T04:40:04.968Z">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Calculating Monopoly Probabilities">
+    <meta name="twitter:description" content="The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit...">
+    <meta name="twitter:url" content="http://bpochily.github.io/calculating-monopoly-probabilities/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "Ben Pochily",
+    "author": {
+        "@type": "Person",
+        "name": "Ben Pochily",
+        "url": "http://bpochily.github.io/author/ben",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "Calculating Monopoly Probabilities",
+    "url": "http://bpochily.github.io/calculating-monopoly-probabilities/",
+    "datePublished": "2015-11-29T04:39:00.000Z",
+    "dateModified": "2015-11-29T04:40:04.968Z",
+    "description": "The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="Ben Pochily" href="http://bpochily.github.io/rss/">
+</head>
+<body class="post-template nav-closed">
+
+    <div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="index.html#" class="nav-close">
+        <span class="hidden">Close</span>
+    </a>
+    <ul>
+            <li class="nav-home" role="presentation"><a href="http://bpochily.github.io/">Home</a></li>
+    </ul>
+    <a class="subscribe-button icon-feed" href="http://bpochily.github.io/rss/">Subscribe</a>
+</div>
+<span class="nav-cover"></span>
+
+
+    <div class="site-wrapper">
+
+        
+
+
+<header class="main-header post-head no-cover">
+    <nav class="main-nav  clearfix">
+        
+            <a class="menu-button icon-menu" href="index.html#"><span class="word">Menu</span></a>
+    </nav>
+</header>
+
+<main class="content" role="main">
+    <article class="post">
+
+        <header class="post-header">
+            <h1 class="post-title">Calculating Monopoly Probabilities</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2015-11-28">28 November 2015</time> 
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>The unpredictable peaks and valleys of a long game of Monopoly have spawned many a friendly dispute. But behind the fickle, arbitrary, and occasionally aggravating game mechanics is a set of probabilities which can be precisely calculated. In the spirit of scientific inquiry and solving silly problems that no one cares about, let's find out how!</p>
+
+<p>I began considering this challenge as part of my quest to build the first serious Monopoly artificial intelligence opponent (see: solving silly problems), an endeavor which begins with a precise apprehension of probabilities from which to calculate expected profits, costs, and return on investment. The overall design of this ongoing project will be explored in a future blog post - for now I'll focus only on the probability calculation component. Several people have explored Monopoly probabilities before me - the most complete solution I have found is <a href="http://www.durangobill.com/Monopoly.html">Durango Bill's Monopoly Probabilities</a>. Fully articulating the nuances of the probability calculations (in particular the manipulations of the Markov matrix) is beyond the realm of appropriately-scoped blog posts - I thus enthusiastically refer confused readers to Durango Bill's admirably thorough explanation.</p>
+
+<h3 id="thebasicproblem">The Basic Problem</h3>
+
+<p>There are a number of factors that influence a player's likelihood of landing on any given space. The dice, of course, have the most obvious impact and follow a bell-curve-like probability distribution. The player can also be moved by landing on Go To Jail, or by drawing certain Chance or Community Chest cards. This hitherto rather trivial computation is complicated by the doubles rules - rolling doubles stipulates that the player must roll again, but three sets of doubles in a row sends the player to jail.</p>
+
+<p>Our goal is to say with completely certainty: If player X begins on Space A, what are the chances he will land on Space B on this turn? What are the chances he will land on Space B in exactly twenty turns? If player X played Monopoly until the heat death of the Universe, what percentage of that time would he spend on Space B?</p>
+
+<p>You can probably see how we would go about solving this problem (except maybe the last bit; that has some additional trickiness). We need to build a tree of possibilities for each turn, taking all player-moving factors into account. Our solution will be driven by a method which handles a single roll, updates probabilities, and uses mutual recursion to build the next branch of the tree.</p>
+
+<h3 id="thecode">The Code</h3>
+
+<p>To implement this in Java, I created a <code>ProbBoard</code> class which contains a list of <code>ProbSpace</code>s. Each <code>ProbSpace</code> stores its own probability for a given search, and includes methods for beginning or continuing a recursive search. By overriding these methods in child classes, we can create different behavior for each type of space.</p>
+
+<p>Here's a look at the two methods in <code>ProbSpace</code> where most of the action happens (this excerpt might be a little unclear, because A) it relies on several other objects and methods, and B) In a personal project, I'm free to indulge my affinity for tastelessly long lines of code! But you should be able to get the general idea - keep in mind that this excerpt is a very small percentage of the code):  </p>
+
+<pre><code class="language-java">protected void updateProbAndRoll(int numDoubles, double multiplier, boolean rollAgain) {  
+        if (!rollAgain) { //if we don't need to roll again, this is the base case and we're done here
+            addToEndProb(multiplier);
+            return;
+        }       
+        addToMidProb(multiplier);
+        doRolls(numDoubles, multiplier);
+}    
+
+private void doRolls(int numDoubles, double multiplier) {  
+        /*
+         * This is where the meat of the recursion takes place. For each possible roll of the dice,
+         * we check for doubles-induced jail and create a branch of the recursive tree for each possible move,
+         * passing along state information and dividing the probability multiplier to reflect the chance that
+         * the branch is actually reached.
+         */
+        board.dice().forEachPossibleRoll((roll, size) -&gt; {
+            if (roll.isDoubles() &amp;&amp; numDoubles &gt;= board.dice().maxDoubles() - 1) //too many doubles, jail time
+                board.jail().updateProbAndRoll(numDoubles, multiplier / size, false);
+            else //otherwise, move a number of spaces to the next space and repeat
+                board.nextSpace(this, roll.getTotal()).updateProbAndRoll(roll.isDoubles() ? numDoubles + 1 : numDoubles, multiplier / size, roll.isDoubles());
+        });
+}
+</code></pre>
+
+<p>Cool. With this type of recursive search, we can figure out the probability of landing on any given space, assuming a particular starting space. Though the code only shows the "default" implementation of <code>updateProbAndRoll</code>, each variety of child space can override the method as needed to simulate different functionality (for example, drawing a card and following the instructions). By computing these probabilities for every starting space on the board, we can create a state-to-state transition table called a <a href="http://en.wikipedia.org/wiki/Stochastic_matrix">Markov matrix</a>.</p>
+
+<p>This matrix has two extremely valuable properties, once we apply a bit of linear algebra. First, by multiplying it by itself repeatedly, we can get the probabilities for an arbitrary number of turns in the future. Second, by manipulating our matrix slightly, we can make it reflect a system of linear equations which, when solved, gives us the steady-state probabilities (That is, the overall probabilities of landing on each space as the number of turns approaches infinity).</p>
+
+<h3 id="furtherthoughts">Further Thoughts</h3>
+
+<p>There are a few more subtleties worth mentioning. First, while a Monopoly player generally has no agency over their own movement (thus making these calculations possible), there is one situation in a Monopoly game where they experience a glimpse of freedom. I am speaking, of course, about jail. Leaving aside this magnificent irony, we notice that jail is the only opportunity the player has to make a movement decision - whether to pay to get out of jail immediately, or sit in jail until three turns have passed or doubles are thrown. To handle this uncertainty, we'll actually generate the entire probability table twice, once with each jail strategy.</p>
+
+<p>Another point: In order for the Markov matrix multiplications to work out correctly, the probabilities can only reflect the beginning and end state of a turn. But because of doubles, it's possible to land on spaces that we neither begin nor end the turn on. Thus, we actually need to track two different sets of probability separately - the probability that we <em>end</em> a turn on a space, and the probability that we <em>land on but do not end on</em> a space. The former is used for the Markov matrix; the sum of both gives a more realistic assessment of an in-game situation. Note that we <em>can</em> include these middle probabilities in our steady-state results; we just have to add them in after solving the matrix, rather than before.</p>
+
+<p>Because this module is a small part of a much larger project, there are two simplifications to the calculations which reflect its intended use in a higher context. First, the Get Out of Jail Free cards are always assumed to be in the deck, rather than held by a player. This will very slightly affect the probabilities of drawing a particular card. A second tiny improvement in accuracy would be to keep track of which cards have been drawn from each deck, and adjust the probabilities accordingly (so that the entire deck is used before cards repeat). Ultimately, we're talking about truly infinitesimal differences, and the overhead of recalculating frequently as well as losing the efficient thread-safety of an immutable set of probabilities is definitely not worth it in the context of the AI.</p>
+
+<p>As I've mentioned, I'm far from the first to calculate Monopoly probabilities programmatically. The primary advantage to my solution over others I've encountered is its adaptability, made possible by Java's object-oriented elegance. Monopoly has inspired about a billion spin-offs - from predictable variants like Star Wars Monopoly to the baffling abomination Heinz Ketchup Monopoly. One of the design goals in crafting my AI was to accommodate the ketchup zealots of the world, so it is important that the probability calculation can adapt to new boards automatically. In addition to handling boards of any size or space configuration, my calculator can tackle any number of custom decks of cards, modified rules of jail and doubles, or strange combinations of dice with any number of sides. More complicated rule modifications can likely be easily handled by extending the <code>ProbSpace</code> class and overriding a method or two.</p>
+
+<p>This has been a whirlwind tour through what is actually a surprisingly subtle and interesting computation. Again, I recommend checking out <a href="http://www.durangobill.com/Monopoly.html">Durango Bill's site</a> for more of the nitty-gritty details. If you just want to see the probability results, I wrote a quick-and-dirty web app which visualizes the calculated probabilities using a heat map. Have a look <a href="http://localhost:2368/monopoly">here</a>!</p>
+
+<p>Or, if you'd like to take a look at the full Java source code for calculating the probabilities, head over to my <a href="http://github.com/bpochily/monopoly-probabilities">github</a>.</p>
+        </section>
+
+        <footer class="post-footer">
+
+       
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story prev no-cover" href="../bitwise-optimization-of-n-queens/">
+        <section class="post">
+            <h2>Bitwise Optimization of N-Queens</h2>
+            <p>The N-Queens problem is a classic problem in algorithm design. It involves finding a way (or multiple ways) to…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://bpochily.github.io">Ben Pochily</a> © 2015</section>
+            <section class="poweredby">Proudly published with <a href="https://ghost.org">Ghost</a></section>
+        </footer>
+
+    </div>
+
+    
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=c3727af285"></script>
+    <script type="text/javascript" src="../assets/js/prism.js?v=c3727af285"></script> 
+    <script type="text/javascript" src="../assets/js/index.js?v=c3727af285"></script>
+
+</body>
